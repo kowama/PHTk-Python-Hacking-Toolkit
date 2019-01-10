@@ -26,7 +26,7 @@ class Scanner:
 
     def crawl(self,url=None):
         if url == None:
-            url = self.target_links
+            url = self.target_url
         page = self.request(url)
         links = self.get_links(page.content)
         for link in links:
@@ -39,7 +39,6 @@ class Scanner:
                     self.target_links.append(link)
                     print(" " +link)
                     self.crawl(link) 
-
 
     def map(self, verbose=True):
         if verbose:
@@ -77,15 +76,63 @@ class Scanner:
         else:
             return self.session.get(action_url, params=req_data)
     
-    def run(self):
-        for link in self.target_links:
+    def check_xss(self, form, link):
+        xss_text_script='<scriPt>alert("hello world !")</sCript>'
+        resp = self.submit_form(form, xss_text_script, link)
+        if xss_text_script in resp.content:
+            return True
+        else:
+            return False
 
-            if "=" in link :
-                print(" [+] Testing : " +link)
-                #METHOD TO TEST SOME VULNE
+    def login(self, url, payload, login_detect={'username':["username","user","email"], 'password':["password", "passwd", "pass"]}):
+        forms = self.extract_forms(url)
+        login_form = None
+        for form in forms :
+            for word in ["log", "auth"]:
+                if word in form.get("action"):
+                    login_form = form
+                    break
+            if login_form is not None:
+                break
 
-            forms = self.extract_forms(link)
-            for form in forms:
-                print(" [+] Testing form in : "+link)
-                #METHOD TO TEST SOME VULNE
+        if login_form is not None:
+            action = login_form.get("action")
+            action_url = urlparse.urljoin(url, action)
+            lform_inputs = login_form.find_all("input")
+            
+            req_data={}
+            for input in lform_inputs:
+                input_name = input.get("name")
+                input_value = input.get("value")
+
+                if input_name in login_detect['username']:
+                    req_data[input_name] = payload['username']
+                
+                elif input_name in login_detect['password']:
+                    req_data[input_name] = payload['password']
+
+                else:
+                    req_data[input_name] = input_value
+
+            print(req_data)
+            return self.session.post(action_url,data= req_data)
+        else:
+            print("[-] login form not find") 
+            return None
+
+
+        def run(self):
+            for link in self.target_links:
+
+                if "=" in link :
+                    print(" [+] Testing : " +link)
+                    #METHOD TO TEST SOME VULNE
+                
+
+                forms = self.extract_forms(link)
+                for form in forms:
+                    print(" [+] Testing form in : "+link)
+                    #METHOD TO TEST SOME VULNE
+                    if self.check_xss(form,link):
+                        print("[*] ****XSSS vunlnerability at form "+link)
 
