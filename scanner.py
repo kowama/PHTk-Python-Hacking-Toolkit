@@ -40,7 +40,7 @@ class Scanner:
                     print(" " +link)
                     self.crawl(link) 
 
-    def map(self, verbose=True):
+    def map_site(self, verbose=True):
         if verbose:
             print("\n===================SITE-MAP============================")
 
@@ -76,19 +76,22 @@ class Scanner:
         else:
             return self.session.get(action_url, params=req_data)
     
-    def check_xss(self, form, link):
+    def test_xss_in_form(self, form, link):
         xss_text_script='<scriPt>alert("hello world !")</sCript>'
         resp = self.submit_form(form, xss_text_script, link)
-        if xss_text_script in resp.content:
-            return True
-        else:
-            return False
+        return xss_text_script in resp.content
+
+    def test_xss_in_url(self, url):
+        xss_text_script='<scriPt>alert("hello world !")</sCript>'
+        url = url.replace('=',  "=" + xss_text_script)
+        resp = self.request(url)
+        return xss_text_script in resp.content
 
     def login(self, url, payload, login_detect={'username':["username","user","email"], 'password':["password", "passwd", "pass"]}):
         forms = self.extract_forms(url)
         login_form = None
         for form in forms :
-            for word in ["log", "auth"]:
+            for word in ["log", "auth"]: 
                 if word in form.get("action"):
                     login_form = form
                     break
@@ -114,25 +117,27 @@ class Scanner:
                 else:
                     req_data[input_name] = input_value
 
-            print(req_data)
             return self.session.post(action_url,data= req_data)
         else:
             print("[-] login form not find") 
             return None
 
+    def run_test(self):
+        for link in self.target_links:
 
-        def run(self):
-            for link in self.target_links:
+            if "=" in link :
+                print("\n [+] Testing URL at : " +link)
+                #METHOD TO TEST SOME VULNE 
+                if self.test_xss_in_url(link):
+                   print("\n [***] XSS vunlnerability at url "+ link)            
 
-                if "=" in link :
-                    print(" [+] Testing : " +link)
-                    #METHOD TO TEST SOME VULNE
-                
-
-                forms = self.extract_forms(link)
-                for form in forms:
-                    print(" [+] Testing form in : "+link)
-                    #METHOD TO TEST SOME VULNE
-                    if self.check_xss(form,link):
-                        print("[*] ****XSSS vunlnerability at form "+link)
+            forms = self.extract_forms(link)
+            for form in forms:
+                print("\n [+] Testing form at  : "+link)
+                #METHOD TO TEST SOME VULNE
+                if self.test_xss_in_form(form,link):
+                    print("\n [***] XSS vunlnerability at form "+ link)
+                    print("***************************************************************")
+                    print(form)
+                    print("****************************************************************")
 
