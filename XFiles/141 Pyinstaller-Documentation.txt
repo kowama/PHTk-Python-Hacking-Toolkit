@@ -1,0 +1,2 @@
+http://pyinstaller.readthedocs.io/en/stable/spec-files.html
+http://pyinstaller.readthedocs.io/en/stable/spec-files.html

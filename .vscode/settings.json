@@ -1,0 +1,4 @@
+{
+    "python.linting.pylintArgs": ["--errors-only"]
+
+}
