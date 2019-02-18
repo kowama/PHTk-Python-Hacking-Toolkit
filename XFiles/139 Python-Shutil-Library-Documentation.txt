@@ -1,2 +1,0 @@
-https://docs.python.org/2/library/shutil.html
-https://docs.python.org/2/library/shutil.html

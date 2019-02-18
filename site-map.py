@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 import requests, argparse, re
-import urlparse
+try:
+    import urlparse
+except ImportError:
+    import urllib.parse as urlparse
+
 
 site_links = []
 

